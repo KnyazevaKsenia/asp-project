@@ -27,6 +27,16 @@ public class AuthService(IAuthRepository authRepository) : IAuthService
         await authRepository.SaveRefreshToken(userId, refreshToken);
     }
 
+    public async Task RevokeUserTokens(Guid userId)
+    {
+        await authRepository.RevokeRefreshTokens(userId);
+    }
+
+    public async Task<Guid> GetUserIdByStudentId(Guid studentId)
+    {
+        return await authRepository.GetUserByStudentId(studentId);
+    }
+    
     public async Task<StudentDto?> GetStudentByRefresh(string refreshToken)
     {
         return await authRepository.GetUserByRefreshToken(refreshToken);

@@ -4,7 +4,7 @@ namespace AspProject.Domain.Models;
 
 public class MaterialDto
 {
-    public Guid UserId { get; set; }
+    public Guid StudentId { get; set; }
     public Guid MaterialId { get; set; }
     public int Course {get; set;}
     public string Subject {get; set;}

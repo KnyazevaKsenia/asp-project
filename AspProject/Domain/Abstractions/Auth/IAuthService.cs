@@ -10,4 +10,6 @@ public interface IAuthService
     public Task<StudentDto?> AuthorizeUser(LoginRequest loginRequest);
     public Task SaveRefreshToken(Guid userId, string refreshToken);
     public Task<StudentDto?> GetStudentByRefresh(string refreshToken);
+    public Task RevokeUserTokens(Guid userId);
+    public Task<Guid> GetUserIdByStudentId(Guid studentId);
 }

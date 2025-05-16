@@ -7,6 +7,7 @@ using AspProject.Domain.Abstractions;
 using AspProject.Domain.Abstractions.Auth;
 using AspProject.Domain.Entities;
 using AspProject.Domain.Services;
+using AspProject.Domain.Services.ExamImitation;
 using AspProject.Infrastrastructure.Database;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -18,18 +19,11 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddAntiforgery();
+string connectionString = builder.Configuration.GetConnectionString("DbConnection");
 
 builder.Services.AddDbContext<AppDbContext>(optionsBuilder =>
 {
-    NpgsqlConnectionStringBuilder builder = new NpgsqlConnectionStringBuilder
-    {
-        Host = "localhost",
-        Port = 5555,
-        Username = "postgres",
-        Password = "20242424",
-        Database = "ExamArchive"
-    };
-    string connectionString = builder.ConnectionString;
     optionsBuilder.UseNpgsql(connectionString);
 });
 
@@ -39,6 +33,10 @@ builder.Services.AddScoped<IFileRepository, FileRepository>();
 builder.Services.AddScoped<IMaterialRepository, MaterialRepository>();
 builder.Services.AddScoped<IAuthRepository, AuthRepository>();
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IFavoriteRepository, FavoriteRepository>();
+builder.Services.AddScoped<IFavoriteService, FavoriteService>();
+builder.Services.AddScoped<ITicketRepository, TicketRepository>();
+builder.Services.AddScoped<ITicketService, TicketService>();
 
 builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
 
@@ -48,12 +46,15 @@ builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
+        
         options.Audience = builder.Configuration["AuthConfig:Audience"];
         options.ClaimsIssuer = builder.Configuration["AuthConfig:Issuer"];
         options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidIssuer = builder.Configuration["AuthConfig:Issuer"],
             ValidAudience = builder.Configuration["AuthConfig:Audience"],
+            ValidateIssuerSigningKey = true, 
+            ValidateLifetime = true, 
             RequireExpirationTime = true,
             RequireAudience = true,
             IssuerSigningKey = new SymmetricSecurityKey(
@@ -68,6 +69,7 @@ builder.Services.AddAutoMapper(expression =>
 {
     expression.AddProfile<MaterialMapperProfile>();
     expression.AddProfile<StudentMappingProfile>();
+    expression.AddProfile<TicketMapperProfile>();
 });
 
 
@@ -77,19 +79,27 @@ builder.Services.AddCors(options =>
     {
         policy.WithOrigins("http://localhost:5173")
             .AllowAnyMethod()
-            .AllowAnyHeader();
+            .AllowAnyHeader()
+            .AllowCredentials();
     });
 });
 
 var app = builder.Build();
-app.UseAuthentication();
-app.UseAuthorization();
 app.UseCors("AllowFrontend");
 app.UseRouting();
+
+app.UseAuthentication();
+app.UseAuthorization();
+
+app.UseAntiforgery();
+
+app.MapGet("/", () => "Server started");
 app.MapMaterials();
 app.MapAddMaterialEndpoint();
+app.MapMyPageEndpoint();
+app.MapExamImitEndpoint();
 app.MapAuthEndpoint();
-app.MapGet("/", () => "Hello World!");
+app.MapFavoriteEndpoints();
 
 app.Run();
 

@@ -24,9 +24,9 @@ public class MaterialMapperProfile : Profile
         CreateMap<MaterialDto, Material>();
         
         CreateMap<Material, MaterialResponseDto>()
-            .ForMember(dest => dest.UserId, opt => opt.MapFrom(src => src.StudentId))
+            .ForMember(dest => dest.StudentId, opt => opt.MapFrom(src => src.StudentId))
             .ForMember(dest => dest.MaterialId, opt => opt.MapFrom(src => src.MaterialId));
-
+        
         
         CreateMap<MaterialResponseDto, MaterialResponse>()
             .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.MaterialId))

@@ -6,7 +6,7 @@ namespace AspProject.Api.Models;
 public class AddNewMaterialRequest
 {   
     
-    public Guid UserId { get; set; }
+    public Guid StudentId { get; set; }
     public int Course {get; set;}
     public string? Subject {get; set;}
     public string? TeacherName {get; set;}

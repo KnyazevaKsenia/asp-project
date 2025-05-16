@@ -2,7 +2,7 @@
 
 public class GetTicketRequest
 {
-    public Guid UserId { get; set; }
+    public Guid StudentId { get; set; }
     public Guid TicketId { get; set; }
 }
 

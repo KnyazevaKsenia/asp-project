@@ -2,6 +2,6 @@
 
 public class AddToFavoriteRequest
 {
-    public Guid UserId { get; set; }
+    public Guid StudentId { get; set; }
     public Guid MaterialId { get; set; }
 }

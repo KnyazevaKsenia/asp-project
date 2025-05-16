@@ -4,8 +4,8 @@ namespace AspProject.Api.Models;
 
 public class CreateTicketRequest
 {
+    public string SubjectName { get; set; }
     public List<string> Questions{get;set;}
-    public List<string> Tasks{get;set;}
-    public TimeOnly Time{get;set;}
+    public TimeOnly Duration{get;set;}
 }
 

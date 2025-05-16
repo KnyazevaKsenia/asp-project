@@ -19,6 +19,8 @@ public class AppDbContext : DbContext
     public DbSet<Student> Students { get; set; }
     public DbSet<User> Users { get; set; }
     public DbSet<RefreshToken> RefreshTokens { get; set; }
+    public DbSet<TicketsSet> TicketsSets { get; set; }
+    public DbSet<Ticket> Tickets { get; set; }
     
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -45,6 +47,11 @@ public class AppDbContext : DbContext
             .HasForeignKey<Student>(s => s.UserId)
             .OnDelete(DeleteBehavior.Cascade);
         
+        modelBuilder.Entity<TicketsSet>()
+            .HasMany(t => t.Tickets)
+            .WithOne(t => t.TicketsSet)
+            .HasForeignKey(t => t.TicketsSetId)
+            .OnDelete(DeleteBehavior.Cascade);
         
     }
 }

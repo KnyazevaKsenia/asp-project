@@ -9,6 +9,7 @@ using AspProject.Domain.Abstractions.Auth;
 using AspProject.Domain.Models;
 using AutoMapper;
 using FluentValidation;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 
@@ -73,14 +74,13 @@ public static class AuthEndpointExt
             {
                 HttpOnly = true,
                 Secure = true, 
-                SameSite = SameSiteMode.Strict,
+                SameSite = SameSiteMode.None,
                 Expires = DateTime.UtcNow.AddDays(7)
             });
             return Results.Ok(new { token = accessToken });
         });
         
-        //получаем новый access токен
-        authGroup.MapGet("/refresh", async (HttpContext context, IAuthService authService, AuthConfig config) =>
+        authGroup.MapPost("/refresh", async (HttpContext context, IAuthService authService, AuthConfig config) =>
         {
               var userRefreshToken = context.Request.Cookies["RefreshToken"];
               if (!string.IsNullOrEmpty(userRefreshToken))
@@ -97,6 +97,23 @@ public static class AuthEndpointExt
               
               return Results.Unauthorized();
         });
+        
+        authGroup.MapPost("/logout", async (HttpContext context, ClaimsPrincipal user, IAuthService authService, AuthConfig config) =>
+        {
+            foreach (var claim in user.Claims)
+            {
+                Console.WriteLine($"{claim.Type}: {claim.Value}");
+            }
+            
+            var studentId= user.Claims.FirstOrDefault(c => c.Type == "StudentId")?.Value;
+            if (!string.IsNullOrEmpty(studentId))
+            {
+                var guidId = Guid.Parse(studentId);
+                var userId = await authService.GetUserIdByStudentId(guidId);
+                await authService.RevokeUserTokens(userId);
+            }
+            return Results.Ok();
+        });
         return authGroup;
         
         string GenerateSecureToken()
@@ -111,8 +128,11 @@ public static class AuthEndpointExt
         {
             var claims = new List<Claim>
             {
-                new("UserId", authResult.Id.ToString()),
+                new("StudentId", authResult.Id.ToString()),
                 new("FirstName", authResult.FirstName),
+                new("LastName", authResult.LastName),
+                new("University", authResult.University),
+                new("Institute", authResult.Institute)
             };
             
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config.IssuerSignKey));

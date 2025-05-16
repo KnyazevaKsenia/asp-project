@@ -85,17 +85,37 @@ public class AuthRepository(AppDbContext context, IMapper mapper, IPasswordHashe
         return student is not null ? mapper.Map<Student, StudentDto>(student) : null;
     }
     
-    public async Task<bool> UpdateRefreshToken(Guid id, string newRefreshToken)
+    public async Task RevokeRefreshTokens(Guid userId)
     {
-        var token = await context.RefreshTokens.FirstOrDefaultAsync(u => u.Id == id);
-        if (token is null) return false;
-        await context.RefreshTokens.AddAsync(new RefreshToken
+        var tokens = await context.RefreshTokens.Where(u => u.UserId == userId).ToListAsync();
+        foreach (var token in tokens)
         {
-            UserId = id,
-            Token = newRefreshToken,
-            Expires = DateTime.UtcNow.AddDays(7)
-        });
+            token.IsRevoked = true;
+        }
         await context.SaveChangesAsync();
-        return true;
     }
+        
+    public async Task<Guid> GetUserByStudentId(Guid studentId)
+    {       
+        var student = await context.Students.FirstOrDefaultAsync(st => st.Id == studentId);
+        
+        if (student== null)
+        {
+            return Guid.Empty;
+        }
+        return student.UserId;
+    }
+    // public async Task<bool> UpdateRefreshToken(Guid id, string newRefreshToken)
+    // {
+    //     var token = await context.RefreshTokens.FirstOrDefaultAsync(u => u.Id == id);
+    //     if (token is null) return false;
+    //     await context.RefreshTokens.AddAsync(new RefreshToken
+    //     {
+    //         UserId = id,
+    //         Token = newRefreshToken,
+    //         Expires = DateTime.UtcNow.AddDays(7)
+    //     });
+    //     await context.SaveChangesAsync();
+    //     return true;
+    // }
 }

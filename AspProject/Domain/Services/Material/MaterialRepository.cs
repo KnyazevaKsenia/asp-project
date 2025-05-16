@@ -11,6 +11,7 @@ public class MaterialRepository(AppDbContext context, IMapper mapper) : IMateria
 {
     public async Task AddMaterial(MaterialDto dto)
     {   
+        //не маппится правильно studentId
         var material = mapper.Map<Material>(dto);
         context.Materials.Add(material);
         await context.SaveChangesAsync();
@@ -66,7 +67,13 @@ public class MaterialRepository(AppDbContext context, IMapper mapper) : IMateria
         Console.WriteLine(material.MaterialId);
         return material;
     }
-
+    
+    public async Task<List<MaterialResponseDto>?> GetMaterialsByStudent(Guid studentId)
+    {
+        var materials = await context.Materials
+            .Where(m => m.StudentId == studentId).AsNoTracking().ToListAsync();
+        return mapper.Map<List<MaterialResponseDto>>(materials);
+    }
     public async Task<List<MaterialResponseDto>?> GetMaterialsByKeyWords(string keyword)
     {
         var materials = await context.Materials
@@ -78,6 +85,37 @@ public class MaterialRepository(AppDbContext context, IMapper mapper) : IMateria
 
         var result = mapper.Map<List<MaterialResponseDto>>(materials);
         return result;
+    }
+    
+    public async Task<bool> ChangeMaterial(MaterialDto material)
+    {
+        var existingMaterial = await context.Materials
+            .FirstOrDefaultAsync(m => m.MaterialId == material.MaterialId);
+        
+        if (existingMaterial == null)
+            return false;
+        
+        existingMaterial.Course = material.Course;
+        existingMaterial.Subject = material.Subject;
+        existingMaterial.TeacherName = material.TeacherName;
+        existingMaterial.Semester = material.Semester;
+        existingMaterial.Description = material.Description;
+        existingMaterial.Date = DateTime.UtcNow; 
+        
+        await context.SaveChangesAsync();
+        return true;
+    }
+
+    public async Task<bool> DeleteMaterialById(Guid id)
+    {
+        var material = await context.Materials.FirstOrDefaultAsync(m => m.MaterialId == id);
+        if (material == null)
+        {
+            return false;
+        }
+        context.Materials.RemoveRange(material);
+        await context.SaveChangesAsync();
+        return true;
     }
 }
 
