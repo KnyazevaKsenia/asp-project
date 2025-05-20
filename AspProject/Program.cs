@@ -5,6 +5,7 @@ using AspProject.Configurations;
 using AspProject.Configurations.Mapper;
 using AspProject.Domain.Abstractions;
 using AspProject.Domain.Abstractions.Auth;
+using AspProject.Domain.Abstractions.IExamImitation;
 using AspProject.Domain.Entities;
 using AspProject.Domain.Services;
 using AspProject.Domain.Services.ExamImitation;

@@ -1,5 +1,6 @@
 ﻿using AspProject.Api.Models;
 using AspProject.Domain.Abstractions;
+using AspProject.Domain.Abstractions.IExamImitation;
 using AspProject.Domain.Models;
 
 namespace AspProject.Domain.Services.ExamImitation;
@@ -43,5 +44,22 @@ public class TicketService(ITicketRepository ticketRepository): ITicketService
         }
         
         return await ticketRepository.SaveTicketSet(set, studentId);
+    }
+    
+    public async Task<List<TicketSetDto>> GetTicketSets(Guid studentId)
+    {
+        var result = await ticketRepository.GetAllStudentTicketSets(studentId);
+        return result;
+    }
+    
+    public async Task<TicketSetDto> GetTicketSetById(Guid ticketSetId)
+    {
+        var result = await ticketRepository.GetTicketSetById(ticketSetId);
+        return result;
+    }
+    
+    public async Task<bool> DeleteTicketSet(Guid ticketSetId)
+    {
+        return await ticketRepository.DeleteTicketSet(ticketSetId);
     }
 }

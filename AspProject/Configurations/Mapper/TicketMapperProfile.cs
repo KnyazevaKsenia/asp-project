@@ -8,10 +8,19 @@ public class TicketMapperProfile : Profile
 {
     public TicketMapperProfile()
     {
-        CreateMap<TicketDto, Ticket>()
-            .ForMember(dest => dest.TicketsSet, opt => opt.Ignore());
-        
+        CreateMap<TicketsSet, TicketSetDto>()
+            .ForMember(dest => dest.Subject, opt => opt.MapFrom(src => src.Subject))
+            .ForMember(dest => dest.Tickets, opt => opt.MapFrom(src => src.Tickets));
+
         CreateMap<Ticket, TicketDto>();
+        
+        CreateMap<TicketDto, Ticket>();
+
+        CreateMap<TicketSetDto, TicketsSet>()
+            .ForMember(dest => dest.Tickets, opt => opt.Ignore()) 
+            .ForMember(dest => dest.Subject, opt => opt.MapFrom(src => src.Subject))
+            .ForMember(dest => dest.Id, opt => opt.Ignore())
+            .ForMember(dest => dest.StudentId, opt => opt.Ignore());
     }
 }
 
